@@ -3,12 +3,22 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
+# ============================================================
+# USER SCHEMAS
+# ============================================================
+
 class UserRegister(BaseModel):
     name: str = Field(min_length=2, max_length=100)
     email: EmailStr
     password: str = Field(min_length=8, max_length=128)
     phone: str = Field(min_length=10, max_length=20)
     role: str
+
+
+# UserCreate is used by routes/auth.py
+# Keep UserRegister as well for compatibility.
+class UserCreate(UserRegister):
+    pass
 
 
 class UserResponse(BaseModel):
@@ -20,6 +30,11 @@ class UserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ============================================================
+# DONATION SCHEMAS
+# ============================================================
 
 class DonationCreate(BaseModel):
     food_name: str
@@ -46,6 +61,11 @@ class DonationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# ============================================================
+# RESCUE MISSION SCHEMA
+# ============================================================
 
 class RescueMissionResponse(BaseModel):
     id: int

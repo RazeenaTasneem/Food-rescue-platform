@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone
+import os
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
@@ -9,7 +10,7 @@ from database import get_db
 from models import User
 
 
-SECRET_KEY = "food-rescue-development-secret-change-later"
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 ALGORITHM = "HS256"
 
