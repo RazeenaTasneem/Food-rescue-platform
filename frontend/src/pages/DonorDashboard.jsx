@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import heroFoodImg from "../assets/hero-food.jpg";
+import buffetFoodImg from "../assets/buffet-food.jpg";
+import bakeryFoodImg from "../assets/bakery-food.jpg";
+import "./Dashboard.css";
 
 function DonorDashboard() {
   const navigate = useNavigate();
 
   const [user, setUser] = useState(null);
   const [donations, setDonations] = useState([]);
+  const [stats, setStats] = useState({
+    totalDonations: 0,
+    mealsRescued: 0,
+    completedPickups: 0,
+    communityImpact: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,37 +38,30 @@ function DonorDashboard() {
 
         setUser(parsedUser);
 
-        const response = await fetch(
-          "http://127.0.0.1:8000/donations/my",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const headers = { Authorization: `Bearer ${token}` };
 
-        // If token is invalid or expired, redirect to login
-        if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("user");
-          navigate("/login");
+        // Fetch donations
+        const donationsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations/my", { headers });
+        
+        if (donationsRes.status === 401) {
+          handleLogout();
           return;
         }
 
-        if (!response.ok) {
-          throw new Error("Failed to load donations");
+        if (!donationsRes.ok) throw new Error("Failed to load donations");
+        setDonations(await donationsRes.json());
+
+        // Fetch stats
+        const statsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations/my/stats", { headers });
+        if (statsRes.ok) {
+          setStats(await statsRes.json());
         }
-
-        const donationData = await response.json();
-
-        setDonations(donationData);
       } catch (error) {
         console.error("Dashboard error:", error);
-        setDonations([]);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     loadDashboard();
   }, [navigate]);
@@ -69,223 +72,157 @@ function DonorDashboard() {
     navigate("/login");
   };
 
-  const totalDonations = donations.length;
+  const getFoodImage = (foodName, foodType) => {
+    const lower = (foodName || "").toLowerCase();
+    if (lower.includes("bread") || lower.includes("bakery") || lower.includes("cake") || lower.includes("croissant")) {
+      return bakeryFoodImg;
+    }
+    if (foodType === "NON_VEGETARIAN" || lower.includes("buffet") || lower.includes("feast") || lower.includes("roast")) {
+      return buffetFoodImg;
+    }
+    return heroFoodImg;
+  };
 
-  const mealsRescued = donations.reduce(
-    (total, donation) =>
-      total + Number(donation.quantity || 0),
-    0
-  );
-
-  const completedPickups = donations.filter(
-    (donation) => donation.status === "DELIVERED"
-  ).length;
-
-  if (loading) {
-    return (
-      <div className="dashboard-loading">
-        Loading dashboard...
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
+  if (loading) return <div className="dashboard-loading">Loading your donor portal...</div>;
+  if (!user) return null;
 
   return (
-    <main className="dashboard-page">
-
+    <main className="dashboard-page appetite-dashboard">
       <div className="dashboard-container">
-
-        {/* Welcome */}
-        <section className="dashboard-welcome">
-
+        {/* Welcome Header */}
+        <section className="dashboard-header app-hero-header">
           <div>
-            <p className="dashboard-label">
-              DONOR DASHBOARD
-            </p>
-
-            <h1>
-              Welcome, {user.name} 👋
-            </h1>
-
-            <p className="dashboard-subtitle">
-              Help turn surplus food into meaningful
-              community impact.
-            </p>
+            <div className="appetite-badge">
+              <span>🍱 RESTAURANT & CATERING PORTAL</span>
+            </div>
+            <h1>Welcome, {user.name} 👋</h1>
+            <p>Every donation transforms kitchen surplus into vital community nourishment.</p>
           </div>
-
-          <button
-            className="logout-btn"
-            onClick={handleLogout}
-          >
+          <button className="secondary-btn logout-header-btn" onClick={handleLogout}>
             Logout
           </button>
-
         </section>
 
-        {/* Statistics */}
-        <section className="stats-grid">
-
-          <div className="stat-card">
-            <div className="stat-icon">🍱</div>
-
-            <div className="stat-value">
-              {totalDonations}
-            </div>
-
-            <div className="stat-label">
-              Total Donations
-            </div>
+        {/* Quick Action Banner */}
+        <div className="quick-post-banner">
+          <div className="quick-post-text">
+            <h3>Fresh Surplus Food Ready Right Now?</h3>
+            <p>List extra cooked food or bakery surplus in 60 seconds for verified NGO pickup.</p>
           </div>
+          <button 
+            className="primary-btn quick-post-btn" 
+            onClick={() => navigate("/create-donation")}
+          >
+            ＋ Create New Food Donation
+          </button>
+        </div>
 
-          <div className="stat-card">
-            <div className="stat-icon">♻️</div>
-
-            <div className="stat-value">
-              {mealsRescued}
-            </div>
-
-            <div className="stat-label">
-              Meals Rescued
-            </div>
+        {/* Statistics Grid */}
+        <section className="stats-grid appetite-stats-grid">
+          <div className="stat-card stat-card-highlight">
+            <span className="stat-icon">🍱</span>
+            <strong className="stat-value">{stats.totalDonations}</strong>
+            <span className="stat-label">Total Listings</span>
+            <small className="stat-sub">Created by your kitchen</small>
           </div>
-
           <div className="stat-card">
-            <div className="stat-icon">🚚</div>
-
-            <div className="stat-value">
-              {completedPickups}
-            </div>
-
-            <div className="stat-label">
-              Completed Pickups
-            </div>
+            <span className="stat-icon">🍲</span>
+            <strong className="stat-value">{stats.mealsRescued}</strong>
+            <span className="stat-label">Meals Shared</span>
+            <small className="stat-sub">Plated food saved from landfill</small>
           </div>
-
           <div className="stat-card">
-            <div className="stat-icon">❤️</div>
-
-            <div className="stat-value">
-              {mealsRescued}
-            </div>
-
-            <div className="stat-label">
-              Community Impact
-            </div>
+            <span className="stat-icon">🚚</span>
+            <strong className="stat-value">{stats.completedPickups}</strong>
+            <span className="stat-label">Completed Rescues</span>
+            <small className="stat-sub">Safely distributed to shelters</small>
           </div>
-
+          <div className="stat-card">
+            <span className="stat-icon">🌱</span>
+            <strong className="stat-value">{Math.round(stats.mealsRescued * 2.1)} kg</strong>
+            <span className="stat-label">CO₂ Offset</span>
+            <small className="stat-sub">Environmental impact achieved</small>
+          </div>
         </section>
 
-        {/* Donations */}
-        <section className="donations-section">
-
-          <div className="section-header">
-
+        {/* Donations List */}
+        <section className="dashboard-section">
+          <div className="section-header-compact">
             <div>
-              <h2>Food Donations</h2>
-
-              <p>
-                Create and track your surplus food
-                donations.
-              </p>
+              <h2>Your Listed Food Donations</h2>
+              <p>Real-time status of your surplus listings and NGO match updates.</p>
             </div>
-
-            <button
-              className="create-donation-btn"
+            <button 
+              className="primary-btn create-donation-btn" 
               onClick={() => navigate("/create-donation")}
             >
-              + Create Donation
+              ＋ Post Donation
             </button>
-
           </div>
 
           {donations.length === 0 ? (
-
             <div className="empty-donations">
-
-              <div className="empty-icon">
-                🍲
-              </div>
-
-              <h3>
-                No donations yet
-              </h3>
-
-              <p>
-                Your food donations will appear here
-                once you create your first donation.
-              </p>
-
-              <button
-                className="empty-create-btn"
-                onClick={() => navigate("/donor/create")}
-              >
+              <div className="empty-icon">🍲</div>
+              <h3>No active food donations yet</h3>
+              <p>Your food listings will appear here once you post your first donation.</p>
+              <button className="primary-btn empty-create-btn" onClick={() => navigate("/create-donation")}>
                 Create Your First Donation
               </button>
-
             </div>
-
           ) : (
-
-            <div className="donation-list">
-
+            <div className="appetite-cards-grid">
               {donations.map((donation) => (
-
-                <div
-                  className="donation-item"
-                  key={donation.id}
-                >
-
-                  <div className="donation-icon">
-                    🍱
+                <div className="food-rescue-card" key={donation.id}>
+                  <div className="card-thumb-wrap">
+                    <img 
+                      src={getFoodImage(donation.food_name, donation.food_type)} 
+                      alt={donation.food_name} 
+                      className="card-thumb-img"
+                    />
+                    <div className="thumb-meals-badge">
+                      <strong>{donation.quantity}</strong> MEALS
+                    </div>
+                    <div className={`thumb-status-badge ${String(donation.status).toLowerCase()}`}>
+                      {donation.status}
+                    </div>
                   </div>
 
-                  <div className="donation-info">
+                  <div className="card-content-wrap">
+                    <div className="card-meta">
+                      {donation.food_type === "VEGETARIAN" ? (
+                        <span className="badge-veg">100% PURE VEG</span>
+                      ) : (
+                        <span className="badge-nonveg">NON-VEG</span>
+                      )}
+                      <span className="card-expiry">
+                        Available until: {new Date(donation.available_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
 
-                    <h3>
-                      {donation.food_name}
-                    </h3>
+                    <h3 className="card-title">{donation.food_name}</h3>
 
-                    <p>
-                      {donation.food_type}
-                    </p>
+                    <div className="card-pickup-info">
+                      <span className="pickup-pin">📍</span>
+                      <p className="pickup-text">
+                        <strong>Pickup Address:</strong> {donation.address}
+                      </p>
+                    </div>
 
+                    <div className="card-action-row">
+                      <span className="sub-text">
+                        Listed {new Date(donation.created_at).toLocaleDateString()}
+                      </span>
+                      <span className={`status-pill ${String(donation.status).toLowerCase()}`}>
+                        {donation.status}
+                      </span>
+                    </div>
                   </div>
-
-                  <div className="donation-quantity">
-
-                    <strong>
-                      {donation.quantity}
-                    </strong>
-
-                    <span>
-                      meals
-                    </span>
-
-                  </div>
-
-                  <div
-                    className={`donation-status ${String(
-                      donation.status
-                    ).toLowerCase()}`}
-                  >
-                    {donation.status}
-                  </div>
-
                 </div>
-
               ))}
-
             </div>
-
           )}
-
         </section>
-
       </div>
-
     </main>
   );
 }

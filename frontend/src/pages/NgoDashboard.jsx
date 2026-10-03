@@ -1,23 +1,33 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import heroFoodImg from "../assets/hero-food.jpg";
+import buffetFoodImg from "../assets/buffet-food.jpg";
+import bakeryFoodImg from "../assets/bakery-food.jpg";
+import "./Dashboard.css";
 
 function NgoDashboard() {
   const [donations, setDonations] = useState([]);
+  const [myRequests, setMyRequests] = useState([]);
+  const [activeTab, setActiveTab] = useState("available"); // "available" or "accepted"
+  const [filterType, setFilterType] = useState("ALL"); // ALL, VEGETARIAN, NON_VEGETARIAN
+  const [searchQuery, setSearchQuery] = useState("");
+  const [stats, setStats] = useState({
+    availableDonations: 0,
+    availableMeals: 0,
+    acceptedCount: 0,
+    peopleServed: 0,
+  });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [requestingId, setRequestingId] = useState(null);
-  const [acceptedCount, setAcceptedCount] = useState(0);
 
   const navigate = useNavigate();
 
-  // --------------------------------------------------
-  // Load available donations
-  // --------------------------------------------------
   useEffect(() => {
-    fetchDonations();
+    fetchDonationsAndStats();
   }, []);
 
-  const fetchDonations = async () => {
+  const fetchDonationsAndStats = async () => {
     try {
       setLoading(true);
       setMessage("");
@@ -29,46 +39,45 @@ function NgoDashboard() {
         return;
       }
 
-      const response = await fetch(
-        "http://127.0.0.1:8000/ngo/donations",
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const headers = { Authorization: `Bearer ${token}` };
 
-      const data = await response.json();
+      // Fetch available donations
+      const response = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/donations", { headers });
 
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("user");
-          navigate("/login");
+          handleLogout();
           return;
         }
-
-        setMessage(
-          data.detail || "Unable to load donations"
-        );
+        const data = await response.json();
+        setMessage(data.detail || "Unable to load donations");
         return;
       }
 
-      setDonations(data);
+      const availableData = await response.json();
+      setDonations(availableData);
+
+      // Fetch NGO's accepted requests
+      const requestsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/my-requests", { headers });
+      if (requestsRes.ok) {
+        const reqData = await requestsRes.json();
+        setMyRequests(reqData);
+      }
+
+      // Fetch stats
+      const statsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/stats", { headers });
+      if (statsRes.ok) {
+        setStats(await statsRes.json());
+      }
+
     } catch (error) {
       console.error("NGO dashboard error:", error);
-      setMessage(
-        "Cannot connect to the backend. Make sure FastAPI is running."
-      );
+      setMessage("Cannot connect to the backend. Make sure FastAPI is running.");
     } finally {
       setLoading(false);
     }
   };
 
-  // --------------------------------------------------
-  // Request a food donation
-  // --------------------------------------------------
   const handleRequestFood = async (donationId) => {
     try {
       const token = localStorage.getItem("access_token");
@@ -82,7 +91,7 @@ function NgoDashboard() {
       setMessage("");
 
       const response = await fetch(
-        `http://127.0.0.1:8000/ngo/request/${donationId}`,
+        `${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}/ngo/request/${donationId}`,
         {
           method: "POST",
           headers: {
@@ -91,367 +100,308 @@ function NgoDashboard() {
         }
       );
 
-      const data = await response.json();
-
       if (!response.ok) {
         if (response.status === 401) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("user");
-          navigate("/login");
+          handleLogout();
           return;
         }
-
-        setMessage(
-          data.detail || "Unable to request this donation"
-        );
-
+        const data = await response.json();
+        setMessage(data.detail || "Unable to accept this donation");
         return;
       }
 
-      // Request succeeded
-      console.log("Rescue mission created:", data);
+      alert("Food accepted successfully! 🎉\n\nThe donation has been matched to your NGO.");
 
-      // Increase accepted donation count
-      setAcceptedCount((count) => count + 1);
+      await fetchDonationsAndStats();
+      setActiveTab("accepted");
 
-      // Remove the requested donation from available list
-      setDonations((currentDonations) =>
-        currentDonations.filter(
-          (donation) => donation.id !== donationId
-        )
-      );
-
-      alert(
-        "Food requested successfully! 🎉\n\nThe donation has been matched to your NGO."
-      );
     } catch (error) {
       console.error("Request food error:", error);
-
-      setMessage(
-        "Cannot connect to the backend. Make sure FastAPI is running."
-      );
+      setMessage("Cannot connect to the backend. Make sure FastAPI is running.");
     } finally {
       setRequestingId(null);
     }
   };
 
-  // --------------------------------------------------
-  // Logout
-  // --------------------------------------------------
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("user");
-
     navigate("/login");
   };
 
-  // --------------------------------------------------
-  // Logged-in user
-  // --------------------------------------------------
-  const user = JSON.parse(
-    localStorage.getItem("user") || "{}"
-  );
+  const getFoodImage = (foodName, foodType) => {
+    const lower = (foodName || "").toLowerCase();
+    if (lower.includes("bread") || lower.includes("bakery") || lower.includes("cake") || lower.includes("croissant")) {
+      return bakeryFoodImg;
+    }
+    if (foodType === "NON_VEGETARIAN" || lower.includes("buffet") || lower.includes("feast") || lower.includes("roast")) {
+      return buffetFoodImg;
+    }
+    return heroFoodImg;
+  };
 
-  // --------------------------------------------------
-  // Statistics
-  // --------------------------------------------------
-  const totalMeals = donations.reduce(
-    (total, donation) =>
-      total + Number(donation.quantity || 0),
-    0
-  );
+  const filteredDonations = donations.filter((d) => {
+    const matchesFilter = filterType === "ALL" || d.food_type === filterType;
+    const matchesQuery = !searchQuery || 
+      d.food_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.address.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesFilter && matchesQuery;
+  });
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   return (
-    <div className="dashboard-page">
-
+    <div className="dashboard-page appetite-dashboard">
       <div className="dashboard-container">
-
-        {/* ==========================================
-            HEADER
-        ========================================== */}
-
-        <div className="dashboard-header">
-
+        {/* HEADER */}
+        <div className="dashboard-header app-hero-header">
           <div>
-
-            <p className="eyebrow">
-              NGO DASHBOARD
-            </p>
-
-            <h1>
-              Welcome, {user.name || "NGO"} 🤝
-            </h1>
-
-            <p>
-              Find surplus food available for your
-              community.
-            </p>
-
+            <div className="appetite-badge">
+              <span>🤝 NGO RESCUE COMMAND</span>
+            </div>
+            <h1>Welcome, {user.name || "Food Rescuer"} 👋</h1>
+            <p>Claim delicious surplus meals in your area and deliver hope to your community.</p>
           </div>
-
-          <button
-            className="secondary-btn"
-            onClick={handleLogout}
-          >
+          <button className="secondary-btn logout-header-btn" onClick={handleLogout}>
             Logout
           </button>
-
         </div>
 
-
-        {/* ==========================================
-            STATISTICS
-        ========================================== */}
-
-        <div className="stats-grid">
-
-          <div className="stat-card">
-
-            <span className="stat-icon">
-              🍱
-            </span>
-
-            <strong>
-              {donations.length}
-            </strong>
-
-            <span>
-              Available Donations
-            </span>
-
+        {/* METRICS */}
+        <div className="stats-grid appetite-stats-grid">
+          <div className="stat-card stat-card-highlight">
+            <span className="stat-icon">🍱</span>
+            <strong className="stat-value">{stats.availableDonations}</strong>
+            <span className="stat-label">Available Donations</span>
+            <small className="stat-sub">Ready for immediate pickup</small>
           </div>
 
-
           <div className="stat-card">
-
-            <span className="stat-icon">
-              ♻️
-            </span>
-
-            <strong>
-              {totalMeals}
-            </strong>
-
-            <span>
-              Available Meals
-            </span>
-
+            <span className="stat-icon">🍲</span>
+            <strong className="stat-value">{stats.availableMeals}</strong>
+            <span className="stat-label">Available Meals</span>
+            <small className="stat-sub">Nourishment awaiting rescue</small>
           </div>
 
-
           <div className="stat-card">
-
-            <span className="stat-icon">
-              🤝
-            </span>
-
-            <strong>
-              {acceptedCount}
-            </strong>
-
-            <span>
-              Accepted Donations
-            </span>
-
+            <span className="stat-icon">🤝</span>
+            <strong className="stat-value">{stats.acceptedCount}</strong>
+            <span className="stat-label">Rescues Accepted</span>
+            <small className="stat-sub">Coordinated by your team</small>
           </div>
 
-
           <div className="stat-card">
-
-            <span className="stat-icon">
-              ❤️
-            </span>
-
-            <strong>
-              0
-            </strong>
-
-            <span>
-              People Served
-            </span>
-
+            <span className="stat-icon">❤️</span>
+            <strong className="stat-value">{stats.acceptedCount * 50 || stats.peopleServed}</strong>
+            <span className="stat-label">Estimated People Fed</span>
+            <small className="stat-sub">Direct nutritional impact</small>
           </div>
-
         </div>
 
-
-        {/* ==========================================
-            AVAILABLE DONATIONS
-        ========================================== */}
-
-        <section className="dashboard-section">
-
-          <div className="section-header">
-
-            <div>
-
-              <h2>
-                Available Food
-              </h2>
-
-              <p>
-                Surplus food currently available
-                for rescue.
-              </p>
-
-            </div>
-
-
+        {/* CONTROLS BAR: TABS & FILTERS */}
+        <div className="dashboard-controls-bar">
+          <div className="dashboard-tabs">
             <button
-              className="secondary-btn"
-              onClick={fetchDonations}
-              disabled={loading}
+              className={`dash-tab-btn ${activeTab === "available" ? "active" : ""}`}
+              onClick={() => setActiveTab("available")}
             >
-              {loading ? "Refreshing..." : "Refresh"}
+              🍱 Available Food ({donations.length})
             </button>
-
+            <button
+              className={`dash-tab-btn ${activeTab === "accepted" ? "active" : ""}`}
+              onClick={() => setActiveTab("accepted")}
+            >
+              🤝 My Accepted Rescues ({myRequests.length})
+            </button>
           </div>
 
-
-          {/* Loading */}
-
-          {loading && (
-            <div className="empty-state">
-
-              Loading available donations...
-
+          {activeTab === "available" && (
+            <div className="filter-chips-row">
+              <button
+                className={`filter-chip ${filterType === "ALL" ? "active" : ""}`}
+                onClick={() => setFilterType("ALL")}
+              >
+                All
+              </button>
+              <button
+                className={`filter-chip ${filterType === "VEGETARIAN" ? "active" : ""}`}
+                onClick={() => setFilterType("VEGETARIAN")}
+              >
+                🌿 Pure Veg
+              </button>
+              <button
+                className={`filter-chip ${filterType === "NON_VEGETARIAN" ? "active" : ""}`}
+                onClick={() => setFilterType("NON_VEGETARIAN")}
+              >
+                🍗 Non-Veg
+              </button>
+              <input
+                type="text"
+                placeholder="Search food or area..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-input-field"
+              />
             </div>
           )}
+        </div>
 
-
-          {/* Error */}
-
-          {!loading && message && (
-            <div className="empty-state">
-
-              {message}
-
+        {/* AVAILABLE FOOD TAB */}
+        {activeTab === "available" ? (
+          <section className="dashboard-section">
+            <div className="section-header-compact">
+              <h2>Fresh Surplus Ready for Pickup</h2>
+              <button className="secondary-btn refresh-btn-compact" onClick={fetchDonationsAndStats} disabled={loading}>
+                {loading ? "Refreshing..." : "🔄 Refresh List"}
+              </button>
             </div>
-          )}
 
+            {loading && <div className="empty-state">Loading delicious food surplus...</div>}
+            {!loading && message && <div className="empty-state">{message}</div>}
 
-          {/* No donations */}
-
-          {!loading &&
-            !message &&
-            donations.length === 0 && (
-
+            {!loading && !message && filteredDonations.length === 0 && (
               <div className="empty-state">
-
-                <div className="empty-icon">
-                  🍲
-                </div>
-
-                <h3>
-                  No food available right now
-                </h3>
-
-                <p>
-                  New surplus food donations
-                  will appear here.
-                </p>
-
+                <div className="empty-icon">🍲</div>
+                <h3>No food available matching criteria</h3>
+                <p>New freshly cooked surplus donations will show up here in real time.</p>
               </div>
-
             )}
 
-
-          {/* Donation list */}
-
-          {!loading &&
-            !message &&
-            donations.length > 0 && (
-
-              <div className="donation-list">
-
-                {donations.map((donation) => (
-
-                  <div
-                    className="ngo-donation-card"
-                    key={donation.id}
-                  >
-
-                    {/* Food icon */}
-
-                    <div className="donation-icon">
-                      🍱
+            {!loading && !message && filteredDonations.length > 0 && (
+              <div className="appetite-cards-grid">
+                {filteredDonations.map((donation) => (
+                  <div className="food-rescue-card" key={donation.id}>
+                    <div className="card-thumb-wrap">
+                      <img 
+                        src={getFoodImage(donation.food_name, donation.food_type)} 
+                        alt={donation.food_name} 
+                        className="card-thumb-img"
+                      />
+                      <div className="thumb-meals-badge">
+                        <strong>{donation.quantity}</strong> MEALS
+                      </div>
+                      <div className="thumb-urgency-badge">⚡ READY NOW</div>
                     </div>
 
+                    <div className="card-content-wrap">
+                      <div className="card-meta">
+                        {donation.food_type === "VEGETARIAN" ? (
+                          <span className="badge-veg">100% PURE VEG</span>
+                        ) : (
+                          <span className="badge-nonveg">NON-VEG</span>
+                        )}
+                        <span className="card-expiry">
+                          ⏳ Till {new Date(donation.available_until).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
 
-                    {/* Food information */}
+                      <h3 className="card-title">{donation.food_name}</h3>
 
-                    <div className="donation-info">
+                      <div className="card-pickup-info">
+                        <span className="pickup-pin">📍</span>
+                        <p className="pickup-text">
+                          <strong>Pickup:</strong> {donation.address}
+                        </p>
+                      </div>
 
-                      <h3>
-                        {donation.food_name}
-                      </h3>
-
-                      <p>
-                        {donation.food_type}
-                      </p>
-
-                      <small>
-                        Available until:{" "}
-                        {new Date(
-                          donation.available_until
-                        ).toLocaleString()}
-                      </small>
-
+                      <div className="card-action-row">
+                        <div className="status-label available">
+                          ● AVAILABLE
+                        </div>
+                        <button
+                          className="primary-btn claim-now-btn"
+                          onClick={() => handleRequestFood(donation.id)}
+                          disabled={requestingId === donation.id}
+                        >
+                          {requestingId === donation.id ? "Accepting..." : "⚡ Accept & Rescue"}
+                        </button>
+                      </div>
                     </div>
-
-
-                    {/* Quantity */}
-
-                    <div className="donation-quantity">
-
-                      <strong>
-                        {donation.quantity}
-                      </strong>
-
-                      <span>
-                        meals
-                      </span>
-
-                    </div>
-
-
-                    {/* Status */}
-
-                    <div className="donation-status">
-                      AVAILABLE
-                    </div>
-
-
-                    {/* Request button */}
-
-                    <button
-                      className="primary-btn"
-                      onClick={() =>
-                        handleRequestFood(
-                          donation.id
-                        )
-                      }
-                      disabled={
-                        requestingId === donation.id
-                      }
-                    >
-                      {requestingId === donation.id
-                        ? "Requesting..."
-                        : "Request Food"}
-                    </button>
-
                   </div>
-
                 ))}
-
               </div>
+            )}
+          </section>
+        ) : (
+          /* MY ACCEPTED RESCUES TAB */
+          <section className="dashboard-section">
+            <div className="section-header-compact">
+              <h2>My Accepted Food Rescues</h2>
+              <p>Donations matched to your NGO for distribution.</p>
+            </div>
 
+            {loading && <div className="empty-state">Loading your rescue missions...</div>}
+
+            {!loading && myRequests.length === 0 && (
+              <div className="empty-state">
+                <div className="empty-icon">🤝</div>
+                <h3>No accepted rescues yet</h3>
+                <p>Browse available surplus food above and accept your first donation!</p>
+                <button
+                  className="primary-btn"
+                  onClick={() => setActiveTab("available")}
+                  style={{ marginTop: "16px" }}
+                >
+                  Browse Available Food
+                </button>
+              </div>
             )}
 
-        </section>
+            {!loading && myRequests.length > 0 && (
+              <div className="appetite-cards-grid">
+                {myRequests.map((req) => (
+                  <div className="food-rescue-card matched-rescue-card" key={req.mission_id}>
+                    <div className="card-thumb-wrap">
+                      <img 
+                        src={getFoodImage(req.food_name, req.food_type)} 
+                        alt={req.food_name} 
+                        className="card-thumb-img"
+                      />
+                      <div className="thumb-meals-badge">
+                        <strong>{req.quantity}</strong> MEALS
+                      </div>
+                      <div className="thumb-status-badge matched">
+                        🤝 MATCHED
+                      </div>
+                    </div>
 
+                    <div className="card-content-wrap">
+                      <div className="card-meta">
+                        {req.food_type === "VEGETARIAN" ? (
+                          <span className="badge-veg">100% PURE VEG</span>
+                        ) : (
+                          <span className="badge-nonveg">NON-VEG</span>
+                        )}
+                        <span className="card-expiry">
+                          Mission M#{req.mission_id}
+                        </span>
+                      </div>
+
+                      <h3 className="card-title">{req.food_name}</h3>
+
+                      <div className="card-pickup-info">
+                        <span className="pickup-pin">📍</span>
+                        <p className="pickup-text">
+                          <strong>Pickup:</strong> {req.address}
+                        </p>
+                      </div>
+
+                      <div className="card-action-row">
+                        <div className="matched-timestamp">
+                          Accepted on {new Date(req.created_at).toLocaleDateString()}
+                        </div>
+                        <span className="mission-active-pill">
+                          Ready for Collection
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
       </div>
-
     </div>
   );
 }
