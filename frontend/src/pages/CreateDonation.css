@@ -1,0 +1,349 @@
+/* CreateDonation.css - Appetite & Modern Form Styling */
+
+.create-donation-page {
+  padding: 100px 5% 80px;
+  min-height: 100vh;
+  position: relative;
+}
+
+.create-donation-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.back-button {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  margin-bottom: 24px;
+  padding: 9px 20px;
+  border-radius: var(--radius-full);
+  transition: var(--transition-bounce);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.back-button:hover {
+  background: var(--bg-surface-hover);
+  color: var(--brand-primary);
+  border-color: var(--brand-primary);
+  transform: translateX(-4px);
+}
+
+.create-donation-layout {
+  display: grid;
+  grid-template-columns: 1.25fr 0.85fr;
+  gap: 36px;
+  align-items: start;
+}
+
+.create-donation-card {
+  background: var(--bg-surface);
+  padding: 40px;
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--border-light);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+}
+
+.create-donation-header {
+  margin-bottom: 28px;
+}
+
+.create-donation-header h1 {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin: 10px 0 6px;
+  letter-spacing: -0.5px;
+}
+
+.create-donation-header p {
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.form-error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Quick templates */
+.quick-templates-section {
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.section-micro-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--brand-secondary);
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.templates-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: none;
+}
+
+.templates-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.template-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-light);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: var(--transition-fast);
+}
+
+.template-btn:hover {
+  background: rgba(226, 55, 68, 0.15);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+/* Form Groups & Inputs (Full Width, Custom Styled) */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 22px;
+  width: 100%;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100% !important;
+  box-sizing: border-box;
+  padding: 14px 18px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition-smooth);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--brand-primary);
+  box-shadow: 0 0 0 3px rgba(226, 55, 68, 0.18);
+  background: var(--bg-surface-solid);
+}
+
+/* Datetime-local native icon adjustments */
+[data-theme="dark"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+[data-theme="light"] input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  opacity: 0.7;
+  cursor: pointer;
+}
+
+/* Dietary Selector Grid */
+.dietary-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+
+.dietary-card {
+  background: var(--bg-input);
+  border: 1px solid var(--border-light);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.dietary-card:hover {
+  border-color: var(--brand-secondary);
+}
+
+.dietary-card.selected.veg {
+  border-color: #10b981;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+.dietary-card.selected.nonveg {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.dietary-icon {
+  font-size: 24px;
+}
+
+.dietary-card strong {
+  display: block;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.dietary-card small {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* Quantity Increments */
+.quantity-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.quick-qty-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.quick-qty-buttons button {
+  background: rgba(255, 183, 3, 0.15);
+  border: 1px solid rgba(255, 183, 3, 0.35);
+  color: #ffb703;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.quick-qty-buttons button:hover {
+  background: #ffb703;
+  color: #000;
+}
+
+.form-row-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.submit-donation-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 10px;
+  border-radius: var(--radius-full);
+}
+
+/* LIVE PREVIEW SIDEBAR */
+.live-preview-sidebar {
+  position: sticky;
+  top: 100px;
+}
+
+.preview-label {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  color: var(--brand-primary);
+  margin-bottom: 12px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.preview-card {
+  box-shadow: 0 20px 35px rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(226, 55, 68, 0.3);
+}
+
+.preview-tip {
+  margin-top: 18px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-light);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.preview-tip strong {
+  color: var(--brand-secondary);
+}
+
+/* Mobile Responsive */
+@media (max-width: 900px) {
+  .create-donation-layout {
+    grid-template-columns: 1fr;
+  }
+  .live-preview-sidebar {
+    order: -1;
+    position: static;
+    margin-bottom: 24px;
+  }
+}
+
+@media (max-width: 580px) {
+  .create-donation-page {
+    padding: 80px 4% 80px;
+  }
+  .create-donation-card {
+    padding: 24px 18px;
+  }
+  .dietary-selector-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-row-two {
+    grid-template-columns: 1fr;
+  }
+}
