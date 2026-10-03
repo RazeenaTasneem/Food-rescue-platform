@@ -22,6 +22,9 @@ if FULL_DB_URL:
     elif FULL_DB_URL.startswith("postgresql://"):
         FULL_DB_URL = FULL_DB_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
         
+    # Remove pgbouncer query parameter which psycopg2 does not support
+    FULL_DB_URL = FULL_DB_URL.replace("?pgbouncer=true", "").replace("&pgbouncer=true", "")
+        
     DATABASE_URL = FULL_DB_URL
     engine = create_engine(DATABASE_URL, echo=False)
 elif DB_USER and DB_PASSWORD:
