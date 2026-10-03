@@ -16,7 +16,12 @@ DB_NAME = os.getenv("DATABASE_NAME")
 FULL_DB_URL = os.getenv("DATABASE_URL")
 
 if FULL_DB_URL:
-    # If the user provides a direct connection string (like from Supabase)
+    # If the user provides a direct connection string, ensure it uses psycopg2
+    if FULL_DB_URL.startswith("postgres://"):
+        FULL_DB_URL = FULL_DB_URL.replace("postgres://", "postgresql+psycopg2://", 1)
+    elif FULL_DB_URL.startswith("postgresql://"):
+        FULL_DB_URL = FULL_DB_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
+        
     DATABASE_URL = FULL_DB_URL
     engine = create_engine(DATABASE_URL, echo=False)
 elif DB_USER and DB_PASSWORD:
