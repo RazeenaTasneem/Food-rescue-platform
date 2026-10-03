@@ -13,18 +13,23 @@ DB_HOST = os.getenv("DATABASE_HOST", "localhost")
 DB_PORT = os.getenv("DATABASE_PORT", "5432")
 DB_NAME = os.getenv("DATABASE_NAME")
 
-# Safely encode the password so special characters don't break the URL
-encoded_password = quote_plus(DB_PASSWORD)
-
-DATABASE_URL = (
-    f"postgresql://{DB_USER}:{encoded_password}"
-    f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
-
-engine = create_engine(
-    DATABASE_URL,
-    echo=False
-)
+if DB_USER and DB_PASSWORD:
+    # Safely encode the password so special characters don't break the URL
+    encoded_password = quote_plus(DB_PASSWORD)
+    DATABASE_URL = (
+        f"postgresql://{DB_USER}:{encoded_password}"
+        f"@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+    engine = create_engine(
+        DATABASE_URL,
+        echo=False
+    )
+else:
+    # Fallback to SQLite if no postgres credentials are provided
+    DATABASE_URL = "sqlite:///./sharebite.db"
+    engine = create_engine(
+        DATABASE_URL, connect_args={"check_same_thread": False}
+    )
 
 SessionLocal = sessionmaker(
     autocommit=False,
