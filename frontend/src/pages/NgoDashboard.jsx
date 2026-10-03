@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import heroFoodImg from "../assets/hero-food.jpg";
 import buffetFoodImg from "../assets/buffet-food.jpg";
 import bakeryFoodImg from "../assets/bakery-food.jpg";
@@ -42,7 +43,7 @@ function NgoDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch available donations
-      const response = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/donations", { headers });
+      const response = await fetch(`${API_BASE_URL}/ngo/donations`, { headers });
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -58,14 +59,14 @@ function NgoDashboard() {
       setDonations(availableData);
 
       // Fetch NGO's accepted requests
-      const requestsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/my-requests", { headers });
+      const requestsRes = await fetch(`${API_BASE_URL}/ngo/my-requests`, { headers });
       if (requestsRes.ok) {
         const reqData = await requestsRes.json();
         setMyRequests(reqData);
       }
 
       // Fetch stats
-      const statsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/ngo/stats", { headers });
+      const statsRes = await fetch(`${API_BASE_URL}/ngo/stats`, { headers });
       if (statsRes.ok) {
         setStats(await statsRes.json());
       }
@@ -91,7 +92,7 @@ function NgoDashboard() {
       setMessage("");
 
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://127.0.0.1:8000"}/ngo/request/${donationId}`,
+        `${API_BASE_URL}/ngo/request/${donationId}`,
         {
           method: "POST",
           headers: {

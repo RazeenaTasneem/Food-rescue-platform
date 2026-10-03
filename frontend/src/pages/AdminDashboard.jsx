@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import "./Dashboard.css";
 import "./AdminDashboard.css";
 
@@ -45,7 +46,7 @@ function AdminDashboard() {
       const headers = { Authorization: `Bearer ${token}` };
 
       // Fetch Stats
-      const statsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/admin/stats", { headers });
+      const statsRes = await fetch(`${API_BASE_URL}/admin/stats`, { headers });
       if (!statsRes.ok) {
         if (statsRes.status === 401 || statsRes.status === 403) {
           navigate("/login");
@@ -57,19 +58,19 @@ function AdminDashboard() {
       setStats(statsData);
 
       // Fetch Donations
-      const donationsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/admin/donations", { headers });
+      const donationsRes = await fetch(`${API_BASE_URL}/admin/donations`, { headers });
       if (donationsRes.ok) {
         setDonations(await donationsRes.json());
       }
 
       // Fetch Missions
-      const missionsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/admin/missions", { headers });
+      const missionsRes = await fetch(`${API_BASE_URL}/admin/missions`, { headers });
       if (missionsRes.ok) {
         setMissions(await missionsRes.json());
       }
 
       // Fetch Users
-      const usersRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/admin/users", { headers });
+      const usersRes = await fetch(`${API_BASE_URL}/admin/users`, { headers });
       if (usersRes.ok) {
         setUsers(await usersRes.json());
       }

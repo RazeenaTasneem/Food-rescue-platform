@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import heroFoodImg from "../assets/hero-food.jpg";
 import buffetFoodImg from "../assets/buffet-food.jpg";
 import bakeryFoodImg from "../assets/bakery-food.jpg";
@@ -21,7 +22,7 @@ function Home() {
     // 1. Fetch real platform stats from backend
     const fetchStats = async () => {
       try {
-        const response = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/api/stats");
+        const response = await fetch(`${API_BASE_URL}/api/stats`);
         if (response.ok) {
           const data = await response.json();
           setStats(data);
@@ -35,7 +36,7 @@ function Home() {
     const fetchLiveDonations = async () => {
       try {
         setLoadingDonations(true);
-        const response = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations/public");
+        const response = await fetch(`${API_BASE_URL}/donations/public`);
         if (response.ok) {
           const data = await response.json();
           setLiveDonations(data);

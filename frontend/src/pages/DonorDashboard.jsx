@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import heroFoodImg from "../assets/hero-food.jpg";
 import buffetFoodImg from "../assets/buffet-food.jpg";
 import bakeryFoodImg from "../assets/bakery-food.jpg";
@@ -41,7 +42,7 @@ function DonorDashboard() {
         const headers = { Authorization: `Bearer ${token}` };
 
         // Fetch donations
-        const donationsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations/my", { headers });
+        const donationsRes = await fetch(`${API_BASE_URL}/donations/my`, { headers });
         
         if (donationsRes.status === 401) {
           handleLogout();
@@ -52,7 +53,7 @@ function DonorDashboard() {
         setDonations(await donationsRes.json());
 
         // Fetch stats
-        const statsRes = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations/my/stats", { headers });
+        const statsRes = await fetch(`${API_BASE_URL}/donations/my/stats`, { headers });
         if (statsRes.ok) {
           setStats(await statsRes.json());
         }

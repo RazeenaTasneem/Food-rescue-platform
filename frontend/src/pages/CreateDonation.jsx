@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import heroFoodImg from "../assets/hero-food.jpg";
 import buffetFoodImg from "../assets/buffet-food.jpg";
 import bakeryFoodImg from "../assets/bakery-food.jpg";
@@ -106,7 +107,7 @@ function CreateDonation() {
         address: formData.address.trim(),
       };
 
-      const response = await fetch((import.meta.env.VITE_API_URL || "http://127.0.0.1:8000") + "/donations", {
+      const response = await fetch(`${API_BASE_URL}/donations`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
