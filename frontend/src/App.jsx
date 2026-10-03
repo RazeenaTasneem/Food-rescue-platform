@@ -7,6 +7,8 @@ import Register from "./pages/Register";
 import DonorDashboard from "./pages/DonorDashboard";
 import CreateDonation from "./pages/CreateDonation";
 import NgoDashboard from "./pages/NgoDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import MobileNav from "./components/MobileNav";
 
 function App() {
   return (
@@ -28,7 +30,11 @@ function App() {
 
         <Route path="/ngo" element={<NgoDashboard />} />
 
+        <Route path="/admin" element={<AdminDashboard />} />
+
       </Routes>
+
+      <MobileNav />
 
     </div>
   );
