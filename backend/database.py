@@ -13,7 +13,13 @@ DB_HOST = os.getenv("DATABASE_HOST", "localhost")
 DB_PORT = os.getenv("DATABASE_PORT", "5432")
 DB_NAME = os.getenv("DATABASE_NAME")
 
-if DB_USER and DB_PASSWORD:
+FULL_DB_URL = os.getenv("DATABASE_URL")
+
+if FULL_DB_URL:
+    # If the user provides a direct connection string (like from Supabase)
+    DATABASE_URL = FULL_DB_URL
+    engine = create_engine(DATABASE_URL, echo=False)
+elif DB_USER and DB_PASSWORD:
     # Safely encode the password so special characters don't break the URL
     encoded_password = quote_plus(DB_PASSWORD)
     DATABASE_URL = (
