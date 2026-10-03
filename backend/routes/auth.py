@@ -27,38 +27,7 @@ from models import User
 from schemas import UserCreate, UserResponse
 
 
-# ============================================================
-# LOAD ENVIRONMENT VARIABLES
-# ============================================================
-
-load_dotenv()
-
-
-# ============================================================
-# JWT CONFIGURATION
-# ============================================================
-
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
-
-ALGORITHM = os.getenv(
-    "ALGORITHM",
-    "HS256"
-)
-
-ACCESS_TOKEN_EXPIRE_MINUTES = int(
-    os.getenv(
-        "ACCESS_TOKEN_EXPIRE_MINUTES",
-        "60"
-    )
-)
-
-
-if not SECRET_KEY:
-    raise RuntimeError(
-        "SECRET_KEY is not configured. "
-        "Please add JWT_SECRET_KEY to your .env file."
-    )
-
+from auth import create_access_token
 
 # ============================================================
 # ROUTER
@@ -68,96 +37,6 @@ router = APIRouter(
     prefix="/auth",
     tags=["Authentication"]
 )
-
-
-# ============================================================
-# OAUTH2
-# ============================================================
-
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="/auth/login"
-)
-
-
-# ============================================================
-# CREATE ACCESS TOKEN
-# ============================================================
-
-def create_access_token(
-    user_id: int,
-    role: str
-):
-
-    expire = datetime.now(
-        timezone.utc
-    ) + timedelta(
-        minutes=ACCESS_TOKEN_EXPIRE_MINUTES
-    )
-
-    payload = {
-        "sub": str(user_id),
-        "role": role,
-        "exp": expire
-    }
-
-    return jwt.encode(
-        payload,
-        SECRET_KEY,
-        algorithm=ALGORITHM
-    )
-
-
-# ============================================================
-# GET CURRENT USER
-# ============================================================
-
-def get_current_user(
-    token: str = Depends(oauth2_scheme),
-    db: Session = Depends(get_db)
-) -> User:
-
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid or expired token",
-        headers={
-            "WWW-Authenticate": "Bearer"
-        }
-    )
-
-    try:
-
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM]
-        )
-
-        user_id_str = payload.get("sub")
-
-        if user_id_str is None:
-            raise credentials_exception
-
-        user_id = int(user_id_str)
-
-    except (
-        JWTError,
-        ValueError,
-        TypeError
-    ):
-
-        raise credentials_exception
-
-
-    user = (
-        db.query(User)
-        .filter(User.id == user_id)
-        .first()
-    )
-
-    if user is None:
-        raise credentials_exception
-
-    return user
 
 
 # ============================================================
@@ -195,7 +74,8 @@ def register_user(
     allowed_roles = [
         "DONOR",
         "NGO",
-        "VOLUNTEER"
+        "VOLUNTEER",
+        "ADMIN"
     ]
 
     if user_data.role not in allowed_roles:
@@ -204,7 +84,7 @@ def register_user(
             status_code=400,
             detail=(
                 "Invalid role. "
-                "Use DONOR, NGO or VOLUNTEER."
+                "Use DONOR, NGO, VOLUNTEER or ADMIN."
             )
         )
 
@@ -222,7 +102,7 @@ def register_user(
     new_user = User(
         name=user_data.name,
         email=user_data.email,
-        password=hashed_password,
+        password_hash=hashed_password,
         phone=user_data.phone,
         role=user_data.role
     )
@@ -273,7 +153,7 @@ def login_user(
 
     password_valid = bcrypt.checkpw(
         form_data.password.encode("utf-8"),
-        user.password.encode("utf-8")
+        user.password_hash.encode("utf-8")
     )
 
 

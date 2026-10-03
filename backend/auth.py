@@ -10,7 +10,7 @@ from database import get_db
 from models import User
 
 
-SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "super-secret-dev-key")
 
 ALGORITHM = "HS256"
 
