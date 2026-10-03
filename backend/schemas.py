@@ -42,8 +42,7 @@ class DonationCreate(BaseModel):
     quantity: int
     prepared_at: datetime
     available_until: datetime
-    latitude: float | None = None
-    longitude: float | None = None
+    address: str = Field(..., description="Pickup address")
 
 
 class DonationResponse(BaseModel):
@@ -54,8 +53,7 @@ class DonationResponse(BaseModel):
     quantity: int
     prepared_at: datetime
     available_until: datetime
-    latitude: float | None = None
-    longitude: float | None = None
+    address: str
     status: str
     created_at: datetime
 

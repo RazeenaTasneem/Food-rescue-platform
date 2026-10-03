@@ -95,14 +95,9 @@ class Donation(Base):
         nullable=False
     )
 
-    latitude = Column(
-        Float,
-        nullable=True
-    )
-
-    longitude = Column(
-        Float,
-        nullable=True
+    address = Column(
+        String(255),
+        nullable=False
     )
 
     status = Column(
