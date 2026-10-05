@@ -673,25 +673,41 @@
     gap: 36px;
   }
   .hero-headline {
-    font-size: 40px;
+    font-size: 42px;
   }
   .hero-main-image {
     height: 380px;
   }
+  .food-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
+  .home-container {
+    padding-top: 64px;
+  }
   .hero-appetite {
-    padding: 30px 4% 20px;
+    padding: 24px 16px 20px;
   }
   .hero-headline {
-    font-size: 32px;
+    font-size: 30px;
   }
   .hero-subtext {
     font-size: 15px;
+    margin-bottom: 24px;
+  }
+  .hero-cta-group {
+    flex-direction: column;
+    width: 100%;
+    gap: 12px;
+  }
+  .hero-main-btn, .hero-sec-btn {
+    width: 100%;
+    text-align: center;
   }
   .hero-main-image {
-    height: 280px;
+    height: 260px;
   }
   .floating-badge {
     padding: 8px 12px;
@@ -703,29 +719,79 @@
     display: none;
   }
   .hero-trust-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
     width: 100%;
+    padding: 16px;
   }
   .trust-separator {
     display: none;
   }
+  .section-title-wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
   .section-title-wrap h2 {
-    font-size: 28px;
+    font-size: 26px;
   }
   .food-cards-grid {
     grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .how-it-works-journey {
+    padding: 40px 16px;
+  }
+  .journey-header h2 {
+    font-size: 26px;
+  }
+  .journey-steps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .impact-cta-banner {
+    padding: 30px 16px;
   }
   .impact-banner-content {
-    padding: 30px 20px;
+    padding: 28px 20px;
     text-align: center;
     justify-content: center;
+    border-radius: var(--radius-lg);
   }
   .banner-left h2 {
     font-size: 24px;
   }
   .banner-btn {
     width: 100%;
+  }
+  .app-footer {
+    padding: 40px 16px 88px;
+  }
+  .footer-top {
+    flex-direction: column;
+    gap: 28px;
+  }
+  .footer-links-group {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-headline {
+    font-size: 26px;
+  }
+  .hero-trust-bar {
+    grid-template-columns: 1fr;
+  }
+  .card-body {
+    padding: 18px;
+  }
+  .card-image-container {
+    height: 190px;
   }
 }

@@ -90,14 +90,21 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
+}
+
 h1, h2, h3, h4, .brand-font {
   font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.02em;
 }
 
+/* Prevent auto-zoom on mobile safari by setting 16px font-size on inputs */
 input, select, textarea {
   font-family: inherit;
-  font-size: 15px;
+  font-size: 16px;
   background: var(--bg-input);
   color: var(--text-primary);
   border: 1px solid var(--border-light);
@@ -106,6 +113,13 @@ input, select, textarea {
   outline: none;
   transition: var(--transition-smooth);
   box-sizing: border-box;
+  max-width: 100%;
+}
+
+@media (min-width: 769px) {
+  input, select, textarea {
+    font-size: 15px;
+  }
 }
 
 input:focus, select:focus, textarea:focus {
@@ -119,8 +133,9 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   overflow-x: hidden;
+  width: 100%;
   transition: background-color 0.3s ease, color 0.3s ease;
-  padding-bottom: 72px; /* space for mobile bottom nav on small screens */
+  padding-bottom: 76px; /* space for mobile bottom nav on small screens */
 }
 
 @media (min-width: 769px) {

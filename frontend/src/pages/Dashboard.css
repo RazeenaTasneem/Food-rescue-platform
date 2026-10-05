@@ -482,35 +482,112 @@
 }
 
 /* Mobile responsive */
+@media (max-width: 992px) {
+  .appetite-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .appetite-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
   .dashboard-page {
-    padding: 84px 4% 80px;
+    padding: 80px 16px 88px;
+  }
+  .app-hero-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 24px;
   }
   .app-hero-header h1 {
-    font-size: 28px;
+    font-size: 26px;
+  }
+  .logout-header-btn {
+    width: 100%;
+    text-align: center;
   }
   .quick-post-banner {
-    padding: 20px;
+    padding: 20px 16px;
     flex-direction: column;
     align-items: stretch;
+    border-radius: var(--radius-md);
   }
   .quick-post-btn {
     width: 100%;
     text-align: center;
   }
-  .appetite-cards-grid {
-    grid-template-columns: 1fr;
+  .appetite-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stat-card {
+    padding: 16px;
+  }
+  .stat-card .stat-value {
+    font-size: 24px;
+  }
+  .stat-card .stat-label {
+    font-size: 12px;
   }
   .dashboard-controls-bar {
     flex-direction: column;
     align-items: stretch;
+    gap: 14px;
+  }
+  .dashboard-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+  }
+  .dash-tab-btn {
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 8px 16px;
+    font-size: 13px;
   }
   .filter-chips-row {
     width: 100%;
+    flex-wrap: nowrap;
     overflow-x: auto;
-    padding-bottom: 4px;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .filter-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 6px 14px;
   }
   .search-input-field {
     width: 100%;
+  }
+  .appetite-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .card-action-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .claim-now-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .appetite-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .card-thumb-wrap {
+    height: 160px;
+  }
+  .card-content-wrap {
+    padding: 16px;
   }
 }

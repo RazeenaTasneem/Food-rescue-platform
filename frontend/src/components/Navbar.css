@@ -156,11 +156,11 @@
 @media (max-width: 768px) {
   .navbar {
     height: 64px;
-    padding: 0 4%;
+    padding: 0 16px;
   }
 
   .nav-brand {
-    font-size: 20px;
+    font-size: 19px;
   }
 
   .brand-tagline {
@@ -168,7 +168,7 @@
   }
 
   .nav-links {
-    gap: 10px;
+    gap: 8px;
   }
 
   .nav-link {
@@ -176,7 +176,28 @@
   }
 
   .login-btn, .register-btn {
-    padding: 7px 14px;
-    font-size: 13px;
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  .theme-toggle {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 400px) {
+  .nav-brand {
+    font-size: 17px;
+  }
+
+  .nav-links {
+    gap: 6px;
+  }
+
+  .login-btn, .register-btn {
+    padding: 6px 10px;
+    font-size: 11px;
   }
 }

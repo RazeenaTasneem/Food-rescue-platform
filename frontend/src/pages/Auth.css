@@ -4,7 +4,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 5%;
+  padding: 96px 16px 80px;
   position: relative;
   overflow: hidden;
 }
@@ -12,7 +12,7 @@
 .auth-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-light);
-  padding: 48px 40px;
+  padding: 44px 36px;
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 440px;
@@ -42,7 +42,7 @@
 .auth-card form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .auth-input-group {
@@ -67,9 +67,17 @@
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: 16px;
   transition: var(--transition-smooth);
   outline: none;
+  box-sizing: border-box;
+}
+
+@media (min-width: 769px) {
+  .auth-card input,
+  .auth-card select {
+    font-size: 15px;
+  }
 }
 
 .auth-card input::placeholder {
@@ -124,10 +132,18 @@
 }
 
 @media (max-width: 480px) {
+  .auth-page {
+    padding: 80px 14px 80px;
+  }
   .auth-card {
-    padding: 32px 20px;
+    padding: 28px 18px;
+    border-radius: var(--radius-lg);
   }
   .auth-card h1 {
     font-size: 26px;
+  }
+  .auth-card p {
+    font-size: 14px;
+    margin-bottom: 20px;
   }
 }
