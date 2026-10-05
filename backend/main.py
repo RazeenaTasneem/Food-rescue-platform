@@ -63,14 +63,14 @@ app.include_router(volunteer_router)
 app.include_router(admin_router)
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {
         "message": "Food Rescue Platform API is running"
     }
 
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 def health_check():
     return {
         "status": "healthy"
